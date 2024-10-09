@@ -12,7 +12,9 @@ import (
 	"github.com/mdcantarini/transaction-processor-api/pkg/model"
 )
 
-func CSVRecordsToTransactions(records [][]string) ([]model.Transaction, error) {
+var CSVRecordsToTransactions = csvRecordsToTransactions
+
+func csvRecordsToTransactions(records [][]string) ([]model.Transaction, error) {
 	var transactions []model.Transaction
 	for _, record := range records {
 		transactionID, err := stringToInt(record[0])

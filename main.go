@@ -4,31 +4,33 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/mdcantarini/transaction-processor-api/pkg/model"
+	"github.com/mdcantarini/transaction-processor-api/pkg/service"
 )
 
 func main() {
 	// set up the service
-	service := NewService()
+	s := service.NewService()
 
 	// fill the database with mandatory initial data
-	err := fillDB(service)
+	err := fillDB(s)
 	if err != nil {
 		panic(err)
 	}
 
 	// set up http router
 	router := gin.Default()
-	SetRoutes(router, service)
+	router.POST("/transactions/run-daily-report", s.RunDailyReport)
+
 	err = router.Run(":8000")
 	if err != nil {
 		panic(err)
 	}
 }
 
-func fillDB(s *Service) error {
+func fillDB(s *service.Service) error {
 	accounts := []model.Account{
 		{Email: "martin.d.cantarini@gmail.com"},
 	}
 
-	return s.accountRepo.UpsertAccounts(accounts)
+	return s.AccountRepo().UpsertAccounts(accounts)
 }

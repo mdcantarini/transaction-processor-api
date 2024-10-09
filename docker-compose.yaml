@@ -6,12 +6,12 @@ services:
     image: transaction-processor-api:latest
     build: .
     environment:
-      DATABASE_DSN: ""
-      MAILTRAP_HOST: ""
-      MAILTRAP_TOKEN: ""
-      MAILTRAP_FROM_EMAIL: ""
-      TRANSACTIONS_FILE_PATH: ""
-      EMAIL_LOGO_URL: ""
+      DATABASE_DSN: "postgres://postgres:postgres@postgres_db:5432/postgres"
+      MAILTRAP_HOST: "https://send.api.mailtrap.io/api/send"
+      MAILTRAP_TOKEN: "Bearer TOKEN_HERE"
+      MAILTRAP_FROM_EMAIL: "hello@demomailtrap.com"
+      TRANSACTIONS_FILE_PATH: "data/transactions.csv"
+      EMAIL_LOGO_URL: "https://i.ibb.co/KypDnr9/logo.gif"
     ports:
       - "8000:8000"
     depends_on:
@@ -20,9 +20,9 @@ services:
     container_name: postgres_db
     image: postgres
     environment:
-      - POSTGRES_USER=
-      - POSTGRES_PASSWORD=
-      - POSTGRES_DB=
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "postgres"
     ports:
       - "5432:5432"
     volumes:
