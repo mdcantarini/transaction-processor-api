@@ -1,4 +1,4 @@
-package main
+package service
 
 import (
 	"fmt"
@@ -15,9 +15,17 @@ import (
 )
 
 type Service struct {
-	transactionRepo model.ITransaction
 	accountRepo     model.IAccount
+	transactionRepo model.ITransaction
 	emailSender     email.EmailSender
+}
+
+func (s *Service) AccountRepo() model.IAccount {
+	return s.accountRepo
+}
+
+func (s *Service) TransactionRepo() model.ITransaction {
+	return s.transactionRepo
 }
 
 func NewService() *Service {
@@ -34,27 +42,38 @@ func NewService() *Service {
 	}
 }
 
+const (
+	parseCSVErr              = `unable to parse csv file`
+	transactionConversionErr = `unable to convert csv records to transactions`
+	insertTransactionErr     = `unable to insert transactions`
+	sendEmailErr             = `unable to send daily report by email`
+)
+
 func (s *Service) RunDailyReport(c *gin.Context) {
 	filePath := os.Getenv("TRANSACTIONS_FILE_PATH")
 
 	records, err := utils.ParseCSVFile(filePath)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, fmt.Errorf("unable to parse csv file: %w", err))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%s: %s", parseCSVErr, err.Error())})
+		return
 	}
 
 	transactions, err := converter.CSVRecordsToTransactions(records)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, fmt.Errorf("unable to convert csv records to transactions: %w", err))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%s: %s", transactionConversionErr, err.Error())})
+		return
 	}
 
-	err = s.transactionRepo.UpsertTransactions(transactions)
+	err = s.TransactionRepo().UpsertTransactions(transactions)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, fmt.Errorf("unable to insert transactions: %w", err))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%s: %s", insertTransactionErr, err.Error())})
+		return
 	}
 
 	err = s.sendDailyReportByEmail(transactions)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, fmt.Errorf("unable to send daily report by email: %w", err))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("%s: %s", sendEmailErr, err.Error())})
+		return
 	}
 
 	c.JSON(http.StatusOK, nil)
@@ -64,9 +83,9 @@ func (s *Service) sendDailyReportByEmail(txs []model.Transaction) error {
 	transactionsByAccount := groupTransactionsByAccount(txs)
 
 	for accountID, transactions := range transactionsByAccount {
-		account, err := s.accountRepo.GetAccount(accountID)
+		account, err := s.AccountRepo().GetAccount(accountID)
 		if err != nil {
-			return fmt.Errorf("unable to fetch user %d", accountID)
+			return fmt.Errorf("unable to fetch account %d", accountID)
 		}
 
 		to := account.Email
