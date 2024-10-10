@@ -14,27 +14,31 @@ import (
 
 var CSVRecordsToTransactions = csvRecordsToTransactions
 
+const (
+	convertingError = `error converting`
+)
+
 func csvRecordsToTransactions(records [][]string) ([]model.Transaction, error) {
 	var transactions []model.Transaction
 	for _, record := range records {
 		transactionID, err := stringToInt(record[0])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf(fmt.Sprintf("%s %s", convertingError, "transactionID"))
 		}
 
 		date, err := stringToDate(record[1])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf(fmt.Sprintf("%s %s", convertingError, "date"))
 		}
 
 		transactionAmount, err := stringToDecimal(record[2])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf(fmt.Sprintf("%s %s", convertingError, "transactionAmount"))
 		}
 
 		accountID, err := stringToInt(record[3])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf(fmt.Sprintf("%s %s", convertingError, "accountID"))
 		}
 
 		transactions = append(transactions, model.Transaction{

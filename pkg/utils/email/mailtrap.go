@@ -1,4 +1,4 @@
-package implementation
+package email
 
 import (
 	"bytes"
@@ -26,6 +26,7 @@ type emailData struct {
 	Attachments []map[string]string `json:"attachments"`
 }
 
+// SendEmail sends an email using the Mailtrap API: https://api-docs.mailtrap.io/docs/mailtrap-api-docs
 func (mt Mailtrap) SendEmail(to, subject, body string, attachments ...string) error {
 	emailData, err := buildEmailData(mt.FromEmail, to, subject, body, attachments...)
 	if err != nil {

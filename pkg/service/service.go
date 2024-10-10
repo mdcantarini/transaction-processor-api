@@ -11,7 +11,6 @@ import (
 	"github.com/mdcantarini/transaction-processor-api/pkg/model"
 	"github.com/mdcantarini/transaction-processor-api/pkg/utils"
 	"github.com/mdcantarini/transaction-processor-api/pkg/utils/email"
-	"github.com/mdcantarini/transaction-processor-api/pkg/utils/email/implementation"
 )
 
 type Service struct {
@@ -34,7 +33,7 @@ func NewService() *Service {
 	return &Service{
 		transactionRepo: model.TransactionRepository{DB: db},
 		accountRepo:     model.AccountRepository{DB: db},
-		emailSender: implementation.Mailtrap{
+		emailSender: email.Mailtrap{
 			FromEmail: os.Getenv("MAILTRAP_FROM_EMAIL"),
 			Host:      os.Getenv("MAILTRAP_HOST"),
 			Token:     os.Getenv("MAILTRAP_TOKEN"),
