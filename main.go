@@ -12,7 +12,7 @@ func main() {
 	s := service.NewService()
 
 	// fill the database with mandatory initial data
-	err := fillDB(s)
+	err := seedDB(s)
 	if err != nil {
 		panic(err)
 	}
@@ -27,7 +27,7 @@ func main() {
 	}
 }
 
-func fillDB(s *service.Service) error {
+func seedDB(s *service.Service) error {
 	accounts := []model.Account{
 		{Email: "martin.d.cantarini@gmail.com"},
 	}
